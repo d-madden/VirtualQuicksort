@@ -1,4 +1,6 @@
 import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 /**
  * @author Daniel Madden
@@ -7,44 +9,93 @@ import java.io.File;
 public class BufferPool {
 
     private Buffer[] buffers;
-    private int discReads;
+    private int diskReads;
     private int diskWrites;
     private int cacheHits;
+    private RandomAccessFile file;
 
-    public BufferPool(int numBuffers) {
+    public BufferPool(int numBuffers, RandomAccessFile fg) {
         buffers = new Buffer[numBuffers];
-        discReads = 0;
+        diskReads = 0;
         diskWrites = 0;
         cacheHits = 0;
+        file = fg;
     }
 
 
     // Copy "sz" bytes from "space" to position "pos" in the buffered storage
-    public void insert(byte[] space, int sz, int pos) {
+    public void insert(byte[] space, int sz, int pos) throws IOException {
         // obtains the bufferID of the buffer we want to pull
         int buffID = getBufferID(pos);
-        // checks if the buffer is already in the pool
         if (containsBuffer(buffID) != -1) {
             // since its already present this will simply reorganize the pool
             // with the given buffer at the front
             this.reorganize(buffID);
-            return;
+            System.arraycopy(space, 0, buffers[buffID].getByteArr(), pos, sz);
+            this.cacheHits++;
         }
 
-        byte[] copy = new byte[sz];
-        System.arraycopy(space, pos, copy, 0, sz);
-        // If its not already in the pool add it to the end then reorganize
-        buffers[buffers.length] = new Buffer(buffID, copy);
-        this.reorganize(buffID);
+        else {
+
+            byte[] reading = new byte[4096];
+
+            file.read(reading, buffID * 4096, 4096);
+
+            if (fullBuffer()) {
+                if (buffers[buffers.length - 1].getDirtyBit() == 1) {
+                    Buffer toWrite = buffers[buffers.length - 1];
+                    file.write(toWrite.getByteArr(), toWrite.getBlockID()
+                        * 4096, 4096);
+                    diskWrites++;
+                    toWrite.flipBit();
+                }
+            }
+
+            buffers[buffers.length - 1] = new Buffer(buffID, reading);
+            this.reorganize(buffID);
+            System.arraycopy(space, 0, buffers[buffID].getByteArr(), pos, sz);
+            this.diskReads++;
+        }
 
     }
 
 
     // Copy "sz" bytes from position "pos" of the buffered storage to "space"
-    public void getbytes(byte[] space, int sz, int pos) {
-        // obtains the bufferID of the buffer we want to pull
+    public void getbytes(byte[] space, int sz, int pos) throws IOException {
+
+        // obtaisn the ID of the position we are getting from
         int buffID = getBufferID(pos);
-        System.arraycopy(buffers[buffID].getByteArr(), 0, space, pos, sz);
+        if (containsBuffer(buffID) != -1) {
+            // since its already present this will simply reorganize the pool
+            // with the given buffer at the front
+            this.reorganize(buffID);
+            System.arraycopy(buffers[buffID].getByteArr(), pos % 4096, space, 0,
+                sz);
+            this.cacheHits++;
+
+        }
+        else {
+
+            byte[] reading = new byte[4096];
+
+            file.read(reading, buffID * 4096, 4096);
+
+            if (fullBuffer()) {
+                if (buffers[buffers.length - 1].getDirtyBit() == 1) {
+                    Buffer toWrite = buffers[buffers.length - 1];
+                    file.write(toWrite.getByteArr(), toWrite.getBlockID()
+                        * 4096, 4096);
+                    diskWrites++;
+                    toWrite.flipBit();
+                }
+            }
+
+            buffers[buffers.length - 1] = new Buffer(buffID, reading);
+            this.reorganize(buffID);
+            System.arraycopy(buffers[buffID].getByteArr(), pos % 4096, space, 0,
+                sz);
+            this.diskReads++;
+        }
 
     }
 
@@ -57,8 +108,7 @@ public class BufferPool {
      *         returns the bufferID we want to obtain
      */
     public int getBufferID(int pos) {
-        int totalBytes = buffers.length * 4096;
-        return (pos / totalBytes);
+        return (pos / 4096);
 
     }
 
@@ -119,6 +169,46 @@ public class BufferPool {
             }
         }
         return -1;
+    }
+
+
+    /**
+     * 
+     * @return
+     *         returns the buffer pool
+     */
+    public Buffer[] getBuffers() {
+        return buffers;
+    }
+
+
+    /**
+     * 
+     * @return
+     *         returns the disk Reads
+     */
+    public int getDiskReads() {
+        return diskReads;
+    }
+
+
+    /**
+     * 
+     * @return
+     *         returns the disk writes
+     */
+    public int getDiskWrites() {
+        return diskWrites;
+    }
+
+
+    /**
+     * 
+     * @return
+     *         returns the cache hits
+     */
+    public int getCacheHits() {
+        return cacheHits;
     }
 
 }
