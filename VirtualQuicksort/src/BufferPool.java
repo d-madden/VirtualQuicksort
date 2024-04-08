@@ -31,7 +31,9 @@ public class BufferPool {
             // since its already present this will simply reorganize the pool
             // with the given buffer at the front
             this.reorganize(buffID);
-            System.arraycopy(space, 0, buffers[buffID].getByteArr(), pos, sz);
+            System.arraycopy(space, 0, buffers[0].getByteArr(), pos, sz);
+            buffers[0].flipBit(1);
+
             this.cacheHits++;
         }
 
@@ -47,14 +49,15 @@ public class BufferPool {
                     file.write(toWrite.getByteArr(), toWrite.getBlockID()
                         * 4096, 4096);
                     diskWrites++;
-                    toWrite.flipBit();
+                    toWrite.flipBit(0);
                 }
             }
 
             buffers[buffers.length - 1] = new Buffer(buffID, reading);
             this.reorganize(buffID);
-            System.arraycopy(space, 0, buffers[buffID].getByteArr(), pos, sz);
+            System.arraycopy(space, 0, buffers[0].getByteArr(), pos, sz);
             this.diskReads++;
+            buffers[0].flipBit(1);
         }
 
     }
@@ -63,14 +66,13 @@ public class BufferPool {
     // Copy "sz" bytes from position "pos" of the buffered storage to "space"
     public void getbytes(byte[] space, int sz, int pos) throws IOException {
 
-        // obtaisn the ID of the position we are getting from
+        // obtains the ID of the position we are getting from
         int buffID = getBufferID(pos);
         if (containsBuffer(buffID) != -1) {
             // since its already present this will simply reorganize the pool
             // with the given buffer at the front
             this.reorganize(buffID);
-            System.arraycopy(buffers[buffID].getByteArr(), pos % 4096, space, 0,
-                sz);
+            System.arraycopy(buffers[0].getByteArr(), pos % 4096, space, 0, sz);
             this.cacheHits++;
 
         }
@@ -86,14 +88,13 @@ public class BufferPool {
                     file.write(toWrite.getByteArr(), toWrite.getBlockID()
                         * 4096, 4096);
                     diskWrites++;
-                    toWrite.flipBit();
+                    toWrite.flipBit(0);
                 }
             }
 
             buffers[buffers.length - 1] = new Buffer(buffID, reading);
             this.reorganize(buffID);
-            System.arraycopy(buffers[buffID].getByteArr(), pos % 4096, space, 0,
-                sz);
+            System.arraycopy(buffers[0].getByteArr(), pos % 4096, space, 0, sz);
             this.diskReads++;
         }
 

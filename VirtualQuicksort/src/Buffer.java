@@ -50,13 +50,8 @@ public class Buffer {
     /**
      * flips the dirty bit indicating it is sorted
      */
-    public void flipBit() {
-        if (dirtyBit == 0) {
-            dirtyBit = 1;
-        }
-        else {
-            dirtyBit = 0;
-        }
+    public void flipBit(int x) {
+        dirtyBit = x;
     }
 
 }
