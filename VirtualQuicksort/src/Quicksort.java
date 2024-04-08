@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -59,12 +60,23 @@ public class Quicksort {
         FileGenerator fg = new FileGenerator(args[0], Integer.parseInt(
             args[1]));
         // new file with a name and size based on the arguments
+        File output = new File(args[2], "w");
+        FileWriter myWriter = new FileWriter(args[2]);
 
         fg.generateFile(FileType.BINARY);
 
         BufferPool pool = new BufferPool(Integer.parseInt(args[1]), file);
 
+        long begTime = System.currentTimeMillis();
         Vquicksort(pool, 0, 4096 * Integer.parseInt(args[1]));
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - begTime;
+
+        myWriter.write(args[0] + "\n");
+        myWriter.write("cache hits:" + pool.getCacheHits() + "\n");
+        myWriter.write("disk reads:" + pool.getDiskReads() + "\n");
+        myWriter.write("disk writes:" + pool.getDiskWrites() + "\n");
+        myWriter.write("Time to execute:" + duration + "\n");
 
         // generates new Binary File
 
