@@ -25,18 +25,17 @@ public class BufferPool {
         int buffID = getBufferID(pos);
         // checks if the buffer is already in the pool
         if (containsBuffer(buffID) != -1) {
+            // since its already present this will simply reorganize the pool
+            // with the given buffer at the front
             this.reorganize(buffID);
             return;
         }
 
-        if (this.fullBuffer()) {
-            // put the new buffer in the last spot
-            buffers[buffers.length - 1] = null;
-
-            // this then puts that buffer to the front and shifts everything
-            // else down one
-            this.reorganize(buffID);
-        }
+        byte[] copy = new byte[sz];
+        System.arraycopy(space, pos, copy, 0, sz);
+        // If its not already in the pool add it to the end then reorganize
+        buffers[buffers.length] = new Buffer(buffID, copy);
+        this.reorganize(buffID);
 
     }
 
