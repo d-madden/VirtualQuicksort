@@ -42,6 +42,9 @@ public class BufferPool {
 
     // Copy "sz" bytes from position "pos" of the buffered storage to "space"
     public void getbytes(byte[] space, int sz, int pos) {
+        // obtains the bufferID of the buffer we want to pull
+        int buffID = getBufferID(pos);
+        System.arraycopy(buffers[buffID].getByteArr(), 0, space, pos, sz);
 
     }
 

@@ -25,16 +25,28 @@ public class Buffer {
     public int getBlockID() {
         return blockID;
     }
-    
+
+
     /**
      * 
      * @return
-     * returns the dirty bit 
+     *         returns the dirty bit
      */
     public int getDirtyBit() {
         return dirtyBit;
     }
-    
+
+
+    /**
+     * 
+     * @return
+     *         returns the byte array
+     */
+    public byte[] getByteArr() {
+        return byteArr;
+    }
+
+
     /**
      * flips the dirty bit indicating it is sorted
      */
