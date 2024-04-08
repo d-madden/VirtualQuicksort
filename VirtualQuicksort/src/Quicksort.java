@@ -54,16 +54,18 @@ public class Quicksort {
         throws NumberFormatException,
         IOException {
         // This is the main file for the program.
+        FileGenerator fg = new FileGenerator(args[0], Integer.parseInt(
+            args[1]));
+        fg.generateFile(FileType.BINARY);
 
         RandomAccessFile file = new RandomAccessFile(args[0], "rw");
 
-        FileGenerator fg = new FileGenerator(args[0], Integer.parseInt(
-            args[1]));
+        
         // new file with a name and size based on the arguments
         File output = new File(args[2], "w");
         FileWriter myWriter = new FileWriter(args[2]);
 
-        fg.generateFile(FileType.BINARY);
+        
 
         BufferPool pool = new BufferPool(Integer.parseInt(args[1]), file);
 

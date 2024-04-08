@@ -162,7 +162,7 @@ public class BufferPool {
      */
     public int containsBuffer(int iD) {
         for (int i = 0; i < buffers.length; i++) {
-            if (buffers[i].equals(null)) {
+            if (buffers[i] == null) {
                 return -1;
             }
             if (buffers[i].getBlockID() == iD) {
