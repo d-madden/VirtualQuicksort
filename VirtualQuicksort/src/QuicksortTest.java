@@ -62,9 +62,9 @@ public class QuicksortTest extends TestCase {
      *
      * @throws Exception either a IOException or FileNotFoundException */
     public void testSorting() throws Exception {
-        String fname = "input.bin";
+        String fname = "tinySorted.txt";
         FileGenerator fg = new FileGenerator(fname, 1);
-        fg.generateFile(FileType.BINARY);
+        fg.generateFile(FileType.ASCII);
         
         assertFalse(CheckFile.check(fname)); // file shouldn't be sorted
 
@@ -76,7 +76,7 @@ public class QuicksortTest extends TestCase {
         // Now the file *should* be sorted, so lets check!
 
         // TODO: In a real test, the following should work:
-        // assertTrue(CheckFile.check(fname));
+         assertTrue(CheckFile.check(fname));
     }
 
 }
