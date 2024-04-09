@@ -53,12 +53,14 @@ public class Quicksort {
     public static void main(String[] args)
         throws NumberFormatException,
         IOException {
-        // This is the main file for the program.
-        FileGenerator fg = new FileGenerator(args[0], Integer.parseInt(
-            args[1]));
-        fg.generateFile(FileType.BINARY);
-
+        
         RandomAccessFile file = new RandomAccessFile(args[0], "rw");
+        // This is the main file for the program.
+//        FileGenerator fg = new FileGenerator(args[0], Integer.parseInt(
+//            args[1]));
+//        fg.generateFile(FileType.BINARY);
+
+        
 
         
         // new file with a name and size based on the arguments
@@ -70,7 +72,7 @@ public class Quicksort {
         BufferPool pool = new BufferPool(Integer.parseInt(args[1]), file);
 
         long begTime = System.currentTimeMillis();
-        Vquicksort(pool, 0, 4096 * Integer.parseInt(args[1]));
+        Vquicksort(pool, 0, ((int)file.length()/4) - 1);
         long endTime = System.currentTimeMillis();
         long duration = endTime - begTime;
 
@@ -123,12 +125,12 @@ public class Quicksort {
         while (left <= right) { // Move bounds inward until they meet
 
             // creates and fills 2-byte arrays with the key
-            byte[] leftArr = new byte[2];
-            byte[] rightArr = new byte[2];
-            byte[] pivotArr = new byte[2];
-            pool.getbytes(leftArr, 2, left);
-            pool.getbytes(rightArr, 2, right);
-            pool.getbytes(pivotArr, 2, pivotIndex);
+            byte[] leftArr = new byte[4];
+            byte[] rightArr = new byte[4];
+            byte[] pivotArr = new byte[4];
+            pool.getbytes(leftArr, 4, left * 4);
+            pool.getbytes(rightArr, 4, right * 4);
+            pool.getbytes(pivotArr, 4, pivotIndex * 4);
 
             short leftShort = getShort(leftArr);
             short rightShort = getShort(rightArr);
@@ -179,22 +181,24 @@ public class Quicksort {
         byte[] destArr = new byte[4];
 
         // Fills the arrays with what we want to swap
-        pool.getbytes(srcArr, 4, src);
-        pool.getbytes(destArr, 4, dest);
+        pool.getbytes(srcArr, 4, src * 4);
+        pool.getbytes(destArr, 4, dest * 4);
 
         // swaps the bytes
-        pool.insert(srcArr, 4, dest);
-        pool.insert(destArr, 4, src);
+        pool.insert(srcArr, 4, dest * 4);
+        pool.insert(destArr, 4, src * 4);
 
     }
 
 
     private static short getShort(byte[] bytes) {
-        ByteBuffer bb = ByteBuffer.allocate(2);
-        bb.order(ByteOrder.LITTLE_ENDIAN);
-        bb.put(bytes[0]);
-        bb.put(bytes[1]);
-        return (bb.getShort(0));
+//        ByteBuffer bb = ByteBuffer.allocate(2);
+//        bb.order(ByteOrder.LITTLE_ENDIAN);
+//        bb.put(bytes[0]);
+//        bb.put(bytes[1]);
+//        return (bb.getShort(0));
+        
+        return ByteBuffer.wrap(bytes).getShort();
     }
 
 }

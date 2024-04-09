@@ -31,7 +31,8 @@ public class BufferPool {
             // since its already present this will simply reorganize the pool
             // with the given buffer at the front
             this.reorganize(buffID);
-            System.arraycopy(space, 0, buffers[0].getByteArr(), pos, sz);
+            buffers[0] = buffers[containsBuffer(buffID)];
+            System.arraycopy(space, 0, buffers[0].getByteArr(), pos % 4096, sz);
             buffers[0].flipBit(1);
 
             this.cacheHits++;
@@ -41,7 +42,8 @@ public class BufferPool {
 
             byte[] reading = new byte[4096];
 
-            file.read(reading, buffID * 4096, 4096);
+            file.seek(buffID * 4096);
+            file.read(reading);
 
             if (fullBuffer()) {
                 if (buffers[buffers.length - 1].getDirtyBit() == 1) {
@@ -53,9 +55,9 @@ public class BufferPool {
                 }
             }
 
-            buffers[buffers.length - 1] = new Buffer(buffID, reading);
             this.reorganize(buffID);
-            System.arraycopy(space, 0, buffers[0].getByteArr(), pos, sz);
+            buffers[0] = new Buffer(buffID, reading);
+            System.arraycopy(space, 0, buffers[0].getByteArr(), pos % 4096, sz);
             this.diskReads++;
             buffers[0].flipBit(1);
         }
@@ -72,6 +74,7 @@ public class BufferPool {
             // since its already present this will simply reorganize the pool
             // with the given buffer at the front
             this.reorganize(buffID);
+            buffers[0] = buffers[containsBuffer(buffID)];
             System.arraycopy(buffers[0].getByteArr(), pos % 4096, space, 0, sz);
             this.cacheHits++;
 
@@ -80,7 +83,8 @@ public class BufferPool {
 
             byte[] reading = new byte[4096];
 
-            file.read(reading, buffID * 4096, 4096);
+            file.seek(buffID * 4096);
+            file.read(reading);
 
             if (fullBuffer()) {
                 if (buffers[buffers.length - 1].getDirtyBit() == 1) {
@@ -92,8 +96,8 @@ public class BufferPool {
                 }
             }
 
-            buffers[buffers.length - 1] = new Buffer(buffID, reading);
             this.reorganize(buffID);
+            buffers[0] = new Buffer(buffID, reading);
             System.arraycopy(buffers[0].getByteArr(), pos % 4096, space, 0, sz);
             this.diskReads++;
         }
@@ -121,7 +125,7 @@ public class BufferPool {
      */
     private boolean fullBuffer() {
         for (int i = 0; i < buffers.length; i++) {
-            if (buffers[i].equals(null)) {
+            if (buffers[i] == null) {
                 return false;
             }
         }
@@ -138,17 +142,15 @@ public class BufferPool {
      */
     private void reorganize(int buffID) {
         int currPos = containsBuffer(buffID);
-        if (currPos == 0) {
+        if (buffers[0] == null) {
             return;
         }
-        int i = 0;
-        Buffer temp = buffers[i];
-        buffers[i] = buffers[currPos];
-        while (i < currPos) {
-            Buffer temp2 = buffers[i + 1];
-            buffers[i + 1] = temp;
-            temp = temp2;
-            i++;
+        if (currPos == -1) {
+            currPos = getEnd();
+        }
+
+        for (int i = currPos - 1; i > 0; i--) {
+            buffers[i - 1] = buffers[i];
         }
     }
 
@@ -170,6 +172,15 @@ public class BufferPool {
             }
         }
         return -1;
+    }
+
+
+    private int getEnd() {
+        int i = 0;
+        while (buffers[i] != null) {
+            i++;
+        }
+        return i;
     }
 
 
