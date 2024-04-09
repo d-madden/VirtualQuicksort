@@ -31,8 +31,9 @@ public class BufferPool {
         if (containsBuffer(buffID) != -1) {
             // since its already present this will simply reorganize the pool
             // with the given buffer at the front
+            Buffer store = buffers[containsBuffer(buffID)];
             this.reorganize(buffID);
-            buffers[0] = buffers[containsBuffer(buffID)];
+            buffers[0] = store;
             System.arraycopy(space, 0, buffers[0].getByteArr(), pos % 4096, sz);
             buffers[0].flipBit(1);
 
@@ -74,8 +75,9 @@ public class BufferPool {
         if (containsBuffer(buffID) != -1) {
             // since its already present this will simply reorganize the pool
             // with the given buffer at the front
+            Buffer store = buffers[containsBuffer(buffID)];
             this.reorganize(buffID);
-            buffers[0] = buffers[containsBuffer(buffID)];
+            buffers[0] = store;
             System.arraycopy(buffers[0].getByteArr(), pos % 4096, space, 0, sz);
             this.cacheHits++;
 
@@ -90,8 +92,9 @@ public class BufferPool {
             if (fullBuffer()) {
                 if (buffers[buffers.length - 1].getDirtyBit() == 1) {
                     Buffer toWrite = buffers[buffers.length - 1];
-                    file.write(toWrite.getByteArr(), toWrite.getBlockID()
-                        * 4096, 4096);
+                    file.seek(toWrite.getBlockID() * 4096);
+                    file.write(toWrite.getByteArr(), 0, toWrite
+                        .getByteArr().length);
                     diskWrites++;
                     toWrite.flipBit(0);
                 }
@@ -150,8 +153,8 @@ public class BufferPool {
             currPos = getEnd();
         }
 
-        for (int i = currPos - 1; i > 0; i--) {
-            buffers[i - 1] = buffers[i];
+        for (int i = currPos - 1; i >= 0; i--) {
+            buffers[i + 1] = buffers[i];
         }
     }
 
@@ -177,6 +180,9 @@ public class BufferPool {
 
 
     private int getEnd() {
+        if(fullBuffer()) {
+            return buffers.length - 1;
+        }
         int i = 0;
         while (buffers[i] != null) {
             i++;

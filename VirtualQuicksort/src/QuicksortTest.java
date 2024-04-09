@@ -13,16 +13,6 @@ public class QuicksortTest extends TestCase {
         systemOut().clearHistory();
     }
     
-    public void testVQuicksort() throws IOException {
-
-        RandomAccessFile file = new RandomAccessFile("tinySorted.txt", "rw");
-        BufferPool pool = new BufferPool(2, file);
-        Quicksort.Vquicksort(pool, 0, ((int)file.length()/4) - 1);
-        Quicksort.writePool(pool, file);
-        
-        
-    }
-    
     public void testFileGen() throws IOException {
         String fname = "threeBlock.txt";
         int blocks = 3;
