@@ -16,6 +16,7 @@ public class BufferPool {
 
     public BufferPool(int numBuffers, RandomAccessFile fg) {
         buffers = new Buffer[numBuffers];
+
         diskReads = 0;
         diskWrites = 0;
         cacheHits = 0;
@@ -211,6 +212,14 @@ public class BufferPool {
      */
     public int getDiskWrites() {
         return diskWrites;
+    }
+
+
+    /**
+     * increments the disk writes
+     */
+    public void addDiskWrite() {
+        diskWrites++;
     }
 
 

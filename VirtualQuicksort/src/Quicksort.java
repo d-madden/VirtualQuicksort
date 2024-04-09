@@ -53,26 +53,22 @@ public class Quicksort {
     public static void main(String[] args)
         throws NumberFormatException,
         IOException {
-        
+
         RandomAccessFile file = new RandomAccessFile(args[0], "rw");
         // This is the main file for the program.
-//        FileGenerator fg = new FileGenerator(args[0], Integer.parseInt(
-//            args[1]));
-//        fg.generateFile(FileType.BINARY);
+// FileGenerator fg = new FileGenerator(args[0], Integer.parseInt(
+// args[1]));
+// fg.generateFile(FileType.BINARY);
 
-        
-
-        
         // new file with a name and size based on the arguments
         File output = new File(args[2], "w");
         FileWriter myWriter = new FileWriter(args[2]);
 
-        
-
         BufferPool pool = new BufferPool(Integer.parseInt(args[1]), file);
 
         long begTime = System.currentTimeMillis();
-        Vquicksort(pool, 0, ((int)file.length()/4) - 1);
+        Vquicksort(pool, 0, ((int)file.length() / 4) - 1);
+        writePool(pool, file);
         long endTime = System.currentTimeMillis();
         long duration = endTime - begTime;
 
@@ -101,7 +97,7 @@ public class Quicksort {
         // swaps the pivot to the right
         swap(pool, pivotIndex, j);
 
-        int k = partition(pool, i, j - 1, pivotIndex);
+        int k = partition(pool, i, j - 1, j);
 
         swap(pool, k, j);
 
@@ -138,9 +134,17 @@ public class Quicksort {
 
             while (leftShort < pivotShort) {
                 left++;
+                pool.getbytes(leftArr, 4, left * 4);
+                leftShort = getShort(leftArr);
             }
             while ((right >= left) && (rightShort >= pivotShort)) {
                 right--;
+                if (right >= 0) {
+
+                    pool.getbytes(rightArr, 4, right * 4);
+                    rightShort = getShort(rightArr);
+                }
+
             }
             if (right > left) {
                 swap(pool, left, right);
@@ -192,13 +196,27 @@ public class Quicksort {
 
 
     private static short getShort(byte[] bytes) {
-//        ByteBuffer bb = ByteBuffer.allocate(2);
-//        bb.order(ByteOrder.LITTLE_ENDIAN);
-//        bb.put(bytes[0]);
-//        bb.put(bytes[1]);
-//        return (bb.getShort(0));
-        
+// ByteBuffer bb = ByteBuffer.allocate(2);
+// bb.order(ByteOrder.LITTLE_ENDIAN);
+// bb.put(bytes[0]);
+// bb.put(bytes[1]);
+// return (bb.getShort(0));
+
         return ByteBuffer.wrap(bytes).getShort();
+    }
+
+
+    public static void writePool(BufferPool pool, RandomAccessFile file)
+        throws IOException {
+        for (int i = 0; i < pool.getBuffers().length; i++) {
+            if (pool.getBuffers()[i].getDirtyBit() == 1) {
+                file.seek(pool.getBufferID(i) * 4096);
+                file.write(pool.getBuffers()[i].getByteArr(), 0, pool
+                    .getBuffers()[i].getByteArr().length);
+                pool.addDiskWrite();
+            }
+
+        }
     }
 
 }
