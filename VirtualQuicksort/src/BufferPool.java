@@ -102,6 +102,7 @@ public class BufferPool {
 
             this.reorganize(buffID);
             buffers[0] = new Buffer(buffID, reading);
+
             System.arraycopy(buffers[0].getByteArr(), pos % 4096, space, 0, sz);
             this.diskReads++;
         }
@@ -180,7 +181,7 @@ public class BufferPool {
 
 
     private int getEnd() {
-        if(fullBuffer()) {
+        if (fullBuffer()) {
             return buffers.length - 1;
         }
         int i = 0;

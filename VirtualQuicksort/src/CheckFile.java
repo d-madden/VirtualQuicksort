@@ -1,25 +1,31 @@
 import java.io.*;
 
-/** CheckFile: Check to see if a file is sorted. This assumes that each record
+/**
+ * CheckFile: Check to see if a file is sorted. This assumes that each record
  * is a pair of short ints with the first short being the key value
  *
- * @author CS3114 Instructors and TAs */
+ * @author CS3114 Instructors and TAs
+ */
 
 public class CheckFile {
 
-    /** This method checks a file to see if it is properly sorted.
+    /**
+     * This method checks a file to see if it is properly sorted.
      *
-     * @param filename a string containing the name of the file to check
+     * @param filename
+     *            a string containing the name of the file to check
      * @return true if the file is sorted, false otherwise
-     * @throws Exception either an IOException or a FileNotFoundException */
+     * @throws Exception
+     *             either an IOException or a FileNotFoundException
+     */
     public static boolean check(String filename) throws Exception {
         DataInputStream dis;
         dis = new DataInputStream(new BufferedInputStream(new FileInputStream(
             filename)));
-        
+
         boolean isError = false;
         int reccnt = 0;
-        
+
         // smallest short possible, nothing is less than it:
         short prev = Short.MIN_VALUE;
         short curr;

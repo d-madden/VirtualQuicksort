@@ -47,18 +47,16 @@ public class Quicksort {
      *            args[0] data file name
      *            args[1] number of buffers
      *            args[2] stat file name
-     * @throws IOException
-     * @throws NumberFormatException
+     * @throws Exception
      */
-    public static void main(String[] args)
-        throws NumberFormatException,
-        IOException {
+    public static void main(String[] args) throws Exception {
+
+        // This is the main file for the program.
+
+        FileGenerator fg = new FileGenerator(args[0], 10);
+        fg.generateFile(FileType.ASCII);
 
         RandomAccessFile file = new RandomAccessFile(args[0], "rw");
-        // This is the main file for the program.
-// FileGenerator fg = new FileGenerator(args[0], Integer.parseInt(
-// args[1]));
-// fg.generateFile(FileType.BINARY);
 
         // new file with a name and size based on the arguments
         File output = new File(args[2], "w");
@@ -76,7 +74,9 @@ public class Quicksort {
         myWriter.write("cache hits:" + pool.getCacheHits() + "\n");
         myWriter.write("disk reads:" + pool.getDiskReads() + "\n");
         myWriter.write("disk writes:" + pool.getDiskWrites() + "\n");
-        myWriter.write("Time to execute:" + duration + "\n");
+        myWriter.write("Time to execute:" + duration + "ms\n");
+        myWriter.write(Boolean.toString(CheckFile.check(args[0])));
+        myWriter.close();
 
         // generates new Binary File
 
@@ -209,8 +209,11 @@ public class Quicksort {
     public static void writePool(BufferPool pool, RandomAccessFile file)
         throws IOException {
         for (int i = 0; i < pool.getBuffers().length; i++) {
+            if (pool.getBuffers()[i] == null) {
+                return;
+            }
             if (pool.getBuffers()[i].getDirtyBit() == 1) {
-                file.seek(pool.getBufferID(i) * 4096);
+                file.seek(pool.getBuffers()[i].getBlockID() * 4096);
                 file.write(pool.getBuffers()[i].getByteArr(), 0, pool
                     .getBuffers()[i].getByteArr().length);
                 pool.addDiskWrite();

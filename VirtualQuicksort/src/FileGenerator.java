@@ -8,7 +8,8 @@ enum FileType {
 
 
 
-/** Generate a test data file of records. Each record is 4 bytes: 2 bytes for
+/**
+ * Generate a test data file of records. Each record is 4 bytes: 2 bytes for
  * the key (a java short, used for sorting), 2 bytes for the value (a java
  * short). A group of 2048 records is a block. Depending on the method, you can
  * generate two types of files: ASCII or raw binary shorts. In ASCII mode, the
@@ -18,7 +19,8 @@ enum FileType {
  * record are in the range [1-30000). Raw binary is not easily human-readable,
  * and often looks like textual garbage.
  * 
- * @author Cliff Shaffer, Patrick Sullivan */
+ * @author Cliff Shaffer, Patrick Sullivan
+ */
 public class FileGenerator {
     static public final int BYTES_IN_KEY = Short.BYTES;
     static public final int BYTES_IN_VALUE = Short.BYTES;
@@ -31,10 +33,14 @@ public class FileGenerator {
     public final String fname;
     private Random rng;
 
-    /** Creates a FileGenerator object for making random files of data.
+    /**
+     * Creates a FileGenerator object for making random files of data.
      * 
-     * @param fname the file name (example 'oneBlock.txt' or 'data.bin')
-     * @param numBlocks number of blocks of data in the file. each block is */
+     * @param fname
+     *            the file name (example 'oneBlock.txt' or 'data.bin')
+     * @param numBlocks
+     *            number of blocks of data in the file. each block is
+     */
     public FileGenerator(String fname, int numBlocks) {
         this.numBlocks = numBlocks;
         this.fname = fname;
@@ -42,19 +48,25 @@ public class FileGenerator {
     }
 
 
-    /** [Optional] Sets the rng seed to make generation deterministic instead of
+    /**
+     * [Optional] Sets the rng seed to make generation deterministic instead of
      * random. Files generated using the same seed will be exactly the same. Can
      * be helpful for consistent testing.
      * 
-     * @param seed the seed */
+     * @param seed
+     *            the seed
+     */
     public void setSeed(long seed) {
         rng.setSeed(seed);
     }
 
 
-    /** Generates a file using the given setup.
+    /**
+     * Generates a file using the given setup.
      * 
-     * @param ft type of file being generated, either binary or ASCII */
+     * @param ft
+     *            type of file being generated, either binary or ASCII
+     */
     public void generateFile(FileType ft) {
         DataOutputStream dos;
         try {
@@ -84,12 +96,18 @@ public class FileGenerator {
     }
 
 
-    /** Generates a file of random ASCII records. This is just to make it easier for your visual inspection
-     * Record keys are one space ' ' and a randomly ASCII charachter within in the range ' A' to ' Z' . 
-     * Record values are always two spaces'  '.
+    /**
+     * Generates a file of random ASCII records. This is just to make it easier
+     * for your visual inspection
+     * Record keys are one space ' ' and a randomly ASCII charachter within in
+     * the range ' A' to ' Z' .
+     * Record values are always two spaces' '.
      * 
-     * @param dos The data output stream to write data to
-     * @throws IOException if writing shorts encounters an issue */
+     * @param dos
+     *            The data output stream to write data to
+     * @throws IOException
+     *             if writing shorts encounters an issue
+     */
     private void generateAsciiFile(DataOutputStream dos) throws IOException {
         int randKey;
         short blankVal = 8224; // raw binary data representing a double-space
@@ -106,11 +124,15 @@ public class FileGenerator {
     }
 
 
-    /** Generates a file of random binary records. Record keys and values are
+    /**
+     * Generates a file of random binary records. Record keys and values are
      * shorts in range [1-30000)
      * 
-     * @param dos The data output stream to write data to
-     * @throws IOException if writing shorts encounters an issue */
+     * @param dos
+     *            The data output stream to write data to
+     * @throws IOException
+     *             if writing shorts encounters an issue
+     */
     private void generateBinaryFile(DataOutputStream dos) throws IOException {
         int randKey, randVal;
         int minRand = 1; // minimum random short
