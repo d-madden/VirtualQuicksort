@@ -1,0 +1,6 @@
+input.bin
+cache hits:951963
+disk reads:547307
+disk writes:221692
+Time to execute:3733ms
+true

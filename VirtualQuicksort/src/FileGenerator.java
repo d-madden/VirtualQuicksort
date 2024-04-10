@@ -8,6 +8,9 @@ import java.util.*;
  * @version 4/9/2024
  */
 enum FileType {
+    /**
+     * two types of files Binary and ASCII
+     */
     BINARY, ASCII
 };
 
@@ -29,22 +32,40 @@ enum FileType {
  * @version 4/9/2024
  */
 public class FileGenerator {
-    // is the amount of bytes in key
+    /**
+     * is the amount of bytes in key
+     */
     static public final int BYTES_IN_KEY = Short.BYTES;
-    // is the amount of bytes in key
+
+    /**
+     * is the amount of bytes in key
+     */
     static public final int BYTES_IN_VALUE = Short.BYTES;
-    // is the amount of bytes per record
+
+    /**
+     * is the amount of bytes per record
+     */
     static public final int BYTES_PER_RECORD = BYTES_IN_KEY + BYTES_IN_VALUE;
-    // is the records per block
+    /**
+     * is the records per block
+     */
     static public final int RECORDS_PER_BLOCK = 1024;
-    // is the bytes per block
+    /**
+     * is the bytes per block
+     */
     static public final int BYTES_PER_BLOCK = RECORDS_PER_BLOCK
         * BYTES_PER_RECORD;
-    // number of blocks
-    public final int numBlocks;
-    // name of the file
-    public final String fname;
-    // random
+    /**
+     * number of blocks
+     */
+    private final int numBlocks;
+    /**
+     * name of the file
+     */
+    private final String fname;
+    /**
+     * random
+     */
     private Random rng;
 
     /**
