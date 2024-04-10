@@ -53,8 +53,8 @@ public class Quicksort {
 
         // This is the main file for the program.
 
-//        FileGenerator fg = new FileGenerator(args[0], 100);
-//        fg.generateFile(FileType.ASCII);
+// FileGenerator fg = new FileGenerator(args[0], 1000);
+// fg.generateFile(FileType.ASCII);
 
         RandomAccessFile file = new RandomAccessFile(args[0], "rw");
 
@@ -65,9 +65,11 @@ public class Quicksort {
         BufferPool pool = new BufferPool(Integer.parseInt(args[1]), file);
 
         long begTime = System.currentTimeMillis();
-        Vquicksort(pool, 0, ((int)file.length() / 4) - 1);
+        // calls the recursive quicksort, won't sort if less than 9 records
+        vQuicksort(pool, 0, ((int)file.length() / 4) - 1);
         long endTime = System.currentTimeMillis();
-        writePool(pool, file);       
+        // writes all the remaining buffers to file
+        writePool(pool, file);
         long duration = endTime - begTime;
 
         myWriter.write(args[0] + "\n");
@@ -101,8 +103,9 @@ public class Quicksort {
      * @throws IOException
      *             throws exception in case you cant pull file
      */
-    public static void Vquicksort(BufferPool pool, int i, int j)
+    public static void vQuicksort(BufferPool pool, int i, int j)
         throws IOException {
+        System.out.println("left:" + i + " right:" + j);
         // obtains the pivot based on left and right trackers
         int pivotIndex = findpivot(i, j);
 
@@ -115,6 +118,12 @@ public class Quicksort {
 
         int k = partition(pool, i, j - 1, j);
 
+        if (k == i) {
+            if (checkDuplicates(pool, i, j)) {
+                return;
+            }
+        }
+
         byte[] kArr = new byte[4];
         byte[] jArr = new byte[4];
         pool.getbytes(kArr, 4, k * 4);
@@ -122,18 +131,51 @@ public class Quicksort {
         swap(pool, k, j, kArr, jArr);
 
         // recursively calls quicksort
-        if ((k - i) > 15) {
-            Vquicksort(pool, i, k - 1);
+        if ((k - i) > 9) {
+            vQuicksort(pool, i, k - 1);
         }
         else {
-            Vinsertionsort(pool, i, k - 1);
+            vInsertionsort(pool, i, k - 1);
         }
-        if ((j - k) > 15) {
-            Vquicksort(pool, k + 1, j);
+        if ((j - k) > 9) {
+            vQuicksort(pool, k + 1, j);
         }
         else {
-            Vinsertionsort(pool, k + 1, j);
+            vInsertionsort(pool, k + 1, j);
         }
+
+    }
+
+
+    /**
+     * checks if a list of terms is all duplicates
+     * 
+     * @param pool
+     *            the pool we are checking data from
+     * @param i
+     *            the beginning of data we are checking
+     * @param j
+     *            the end of data we are checking
+     * @return
+     *         returns true if all duplicates, false otherwise
+     * @throws IOException
+     *             throws exception if file cant be read
+     */
+    private static boolean checkDuplicates(BufferPool pool, int i, int j)
+        throws IOException {
+        byte[] iArr = new byte[4];
+        byte[] jArr = new byte[4];
+        pool.getbytes(iArr, 4, i * 4);
+
+        for (int q = i + 1; q < j; q++) {
+            pool.getbytes(jArr, 4, q * 4);
+            short iShort = getShort(iArr);
+            short jShort = getShort(jArr);
+            if (jShort != iShort) {
+                return false;
+            }
+        }
+        return true;
 
     }
 
@@ -150,7 +192,7 @@ public class Quicksort {
      * @throws IOException
      *             in case we cant read file
      */
-    public static void Vinsertionsort(BufferPool pool, int low, int high)
+    public static void vInsertionsort(BufferPool pool, int low, int high)
         throws IOException {
 
         for (int i = low + 1; i <= high; i++) {
@@ -211,7 +253,6 @@ public class Quicksort {
             while ((right >= left) && (rightShort >= pivotShort)) {
                 right--;
                 if (right >= 0) {
-
                     pool.getbytes(rightArr, 4, right * 4);
                     rightShort = getShort(rightArr);
                 }
