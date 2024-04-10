@@ -53,7 +53,7 @@ public class Quicksort {
 
         // This is the main file for the program.
 
-        FileGenerator fg = new FileGenerator(args[0], 10);
+        FileGenerator fg = new FileGenerator(args[0], 100);
         fg.generateFile(FileType.ASCII);
 
         RandomAccessFile file = new RandomAccessFile(args[0], "rw");
@@ -114,12 +114,38 @@ public class Quicksort {
         swap(pool, k, j);
 
         // recursively calls quicksort
-        if ((k - i) > 1) {
+        if ((k - i) > 9) {
             Vquicksort(pool, i, k - 1);
         }
-        if ((j - k) > 1) {
+        else {
+            Vinsertionsort(pool, i, k - 1);
+        }
+        if ((j - k) > 9) {
             Vquicksort(pool, k + 1, j);
         }
+        else {
+            Vinsertionsort(pool, k + 1, j);
+        }
+
+    }
+
+
+    /**
+     * insertion sort to be used for when there are less than 9 records
+     * 
+     * @param pool
+     *            the pool we are getting data from
+     * @param low
+     *            the low position we are sorting from
+     * @param high
+     *            the high we are sorting from
+     * @throws IOException
+     *             in case we cant read file
+     */
+    public static void Vinsertionsort(BufferPool pool, int low, int high)
+        throws IOException {
+
+        // needs to be implemented
 
     }
 
@@ -159,9 +185,9 @@ public class Quicksort {
 
             }
             if (right > left) {
-                if (rightShort != leftShort) {
-                    swap(pool, left, right);
-                }
+
+                swap(pool, left, right);
+
             } // Swap out-of-place values
         }
         return left;
@@ -201,6 +227,11 @@ public class Quicksort {
         // Fills the arrays with what we want to swap
         pool.getbytes(srcArr, 4, src * 4);
         pool.getbytes(destArr, 4, dest * 4);
+
+        // wont swap if duplicates
+        if (getShort(srcArr) == getShort(destArr)) {
+            return;
+        }
 
         // swaps the bytes
         pool.insert(srcArr, 4, dest * 4);
