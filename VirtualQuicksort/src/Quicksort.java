@@ -53,8 +53,8 @@ public class Quicksort {
 
         // This is the main file for the program.
 
-        FileGenerator fg = new FileGenerator(args[0], 10);
-        fg.generateFile(FileType.ASCII);
+// FileGenerator fg = new FileGenerator(args[0], 10);
+// fg.generateFile(FileType.ASCII);
 
         RandomAccessFile file = new RandomAccessFile(args[0], "rw");
 
@@ -89,6 +89,18 @@ public class Quicksort {
     }
 
 
+    /**
+     * the recursive quicksort function
+     * 
+     * @param pool
+     *            takes in a buffer pool
+     * @param i
+     *            the first index
+     * @param j
+     *            the last index
+     * @throws IOException
+     *             throws exception in case you cant pull file
+     */
     public static void Vquicksort(BufferPool pool, int i, int j)
         throws IOException {
         // obtains the pivot based on left and right trackers
@@ -206,6 +218,16 @@ public class Quicksort {
     }
 
 
+    /**
+     * writes all the remaining changed bytes to the file
+     * 
+     * @param pool
+     *            takes in the buffer pool
+     * @param file
+     *            takes in the file to over right
+     * @throws IOException
+     *             throws exception in case not found
+     */
     public static void writePool(BufferPool pool, RandomAccessFile file)
         throws IOException {
         for (int i = 0; i < pool.getBuffers().length; i++) {

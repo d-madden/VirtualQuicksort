@@ -5,6 +5,8 @@ import java.io.RandomAccessFile;
 /**
  * @author Daniel Madden
  * @author Jordan DeNaro
+ * 
+ * @version 4/9/2024
  */
 public class BufferPool {
 
@@ -14,6 +16,14 @@ public class BufferPool {
     private int cacheHits;
     private RandomAccessFile file;
 
+    /**
+     * constructor BufferPool
+     * 
+     * @param numBuffers
+     *            Is the number of buffers in the buffer pool
+     * @param fg
+     *            The random access File given
+     */
     public BufferPool(int numBuffers, RandomAccessFile fg) {
         buffers = new Buffer[numBuffers];
 
@@ -24,7 +34,18 @@ public class BufferPool {
     }
 
 
-    // Copy "sz" bytes from "space" to position "pos" in the buffered storage
+    /**
+     * inserts some given record into a given position
+     * 
+     * @param space
+     *            this is the 4 byte array we are adding from
+     * @param sz
+     *            size of the array we are adding to
+     * @param pos
+     *            the position we are adding to
+     * @throws IOException
+     *             throws exception if file cant be found
+     */
     public void insert(byte[] space, int sz, int pos) throws IOException {
         // obtains the bufferID of the buffer we want to pull
         int buffID = getBufferID(pos);
@@ -50,8 +71,9 @@ public class BufferPool {
             if (fullBuffer()) {
                 if (buffers[buffers.length - 1].getDirtyBit() == 1) {
                     Buffer toWrite = buffers[buffers.length - 1];
-                    file.write(toWrite.getByteArr(), toWrite.getBlockID()
-                        * 4096, 4096);
+                    file.seek(toWrite.getBlockID() * 4096);
+                    file.write(toWrite.getByteArr(), 0, toWrite
+                        .getByteArr().length);
                     diskWrites++;
                     toWrite.flipBit(0);
                 }
@@ -67,7 +89,19 @@ public class BufferPool {
     }
 
 
-    // Copy "sz" bytes from position "pos" of the buffered storage to "space"
+    /**
+     * Obtains the bytes from pos in the file and adds it to the byte array
+     * space
+     * 
+     * @param space
+     *            the byte array we are adding to record to
+     * @param sz
+     *            the size of the array we are adding to
+     * @param pos
+     *            the position from where we grab the bytes
+     * @throws IOException
+     *             the exception in case you cant pull the file
+     */
     public void getbytes(byte[] space, int sz, int pos) throws IOException {
 
         // obtains the ID of the position we are getting from

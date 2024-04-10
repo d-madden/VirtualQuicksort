@@ -1,6 +1,6 @@
 input1.txt
-cache hits:2261826
-disk reads:42
-disk writes:42
-Time to execute:164ms
+cache hits:2203127
+disk reads:67687
+disk writes:24669
+Time to execute:678ms
 true

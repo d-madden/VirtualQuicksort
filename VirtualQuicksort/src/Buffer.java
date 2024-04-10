@@ -4,6 +4,8 @@
  * 
  * @author Daniel Madden
  * @author Jordan DeNaro
+ * 
+ * @version 4/9/2024
  */
 public class Buffer {
 
@@ -11,6 +13,15 @@ public class Buffer {
     private int blockID;
     private int dirtyBit = 0;
 
+    /**
+     * constructor for the Buffer class
+     * 
+     * @param iD
+     *            is the iD of the buffer
+     * @param byteArr
+     *            the byteArray the buffer holds
+     * 
+     */
     public Buffer(int iD, byte[] byteArr) {
         blockID = iD;
         this.byteArr = byteArr;
@@ -48,7 +59,10 @@ public class Buffer {
 
 
     /**
-     * flips the dirty bit indicating it is sorted
+     * flips the dirty bit
+     * 
+     * @param x
+     *            is what we are changing the dirty bit to
      */
     public void flipBit(int x) {
         dirtyBit = x;
