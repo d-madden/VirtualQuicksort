@@ -53,8 +53,8 @@ public class Quicksort {
 
         // This is the main file for the program.
 
-        FileGenerator fg = new FileGenerator(args[0], 100);
-        fg.generateFile(FileType.ASCII);
+//        FileGenerator fg = new FileGenerator(args[0], 100);
+//        fg.generateFile(FileType.ASCII);
 
         RandomAccessFile file = new RandomAccessFile(args[0], "rw");
 
@@ -66,8 +66,8 @@ public class Quicksort {
 
         long begTime = System.currentTimeMillis();
         Vquicksort(pool, 0, ((int)file.length() / 4) - 1);
-        writePool(pool, file);
         long endTime = System.currentTimeMillis();
+        writePool(pool, file);       
         long duration = endTime - begTime;
 
         myWriter.write(args[0] + "\n");
@@ -107,20 +107,28 @@ public class Quicksort {
         int pivotIndex = findpivot(i, j);
 
         // swaps the pivot to the right
-        swap(pool, pivotIndex, j);
+        byte[] rightArr = new byte[4];
+        byte[] pivotArr = new byte[4];
+        pool.getbytes(rightArr, 4, j * 4);
+        pool.getbytes(pivotArr, 4, pivotIndex * 4);
+        swap(pool, pivotIndex, j, pivotArr, rightArr);
 
         int k = partition(pool, i, j - 1, j);
 
-        swap(pool, k, j);
+        byte[] kArr = new byte[4];
+        byte[] jArr = new byte[4];
+        pool.getbytes(kArr, 4, k * 4);
+        pool.getbytes(jArr, 4, j * 4);
+        swap(pool, k, j, kArr, jArr);
 
         // recursively calls quicksort
-        if ((k - i) > 9) {
+        if ((k - i) > 15) {
             Vquicksort(pool, i, k - 1);
         }
         else {
             Vinsertionsort(pool, i, k - 1);
         }
-        if ((j - k) > 9) {
+        if ((j - k) > 15) {
             Vquicksort(pool, k + 1, j);
         }
         else {
@@ -145,7 +153,32 @@ public class Quicksort {
     public static void Vinsertionsort(BufferPool pool, int low, int high)
         throws IOException {
 
-        // needs to be implemented
+        for (int i = low + 1; i <= high; i++) {
+            byte[] key = new byte[4];
+            pool.getbytes(key, 4, i * 4);
+            short keyShort = getShort(key);
+
+            int j = i - 1;
+            byte[] temp = new byte[4];
+
+            // Shift elements of the sorted segment forward if they're larger
+            // than keyShort
+            while (j >= low) {
+                pool.getbytes(temp, 4, j * 4);
+                short tempShort = getShort(temp);
+
+                if (tempShort > keyShort) {
+                    pool.insert(temp, 4, (j + 1) * 4);
+                    pool.insert(key, 4, j * 4);
+                }
+                else {
+                    break; // Found the correct position for keyShort
+                }
+                j--;
+            }
+            // Insert the key at its correct position
+            pool.insert(key, 4, (j + 1) * 4);
+        }
 
     }
 
@@ -186,7 +219,7 @@ public class Quicksort {
             }
             if (right > left) {
 
-                swap(pool, left, right);
+                swap(pool, left, right, leftArr, rightArr);
 
             } // Swap out-of-place values
         }
@@ -218,15 +251,13 @@ public class Quicksort {
      *            the destination of what we are swapping
      * @throws IOException
      */
-    private static void swap(BufferPool pool, int src, int dest)
+    private static void swap(
+        BufferPool pool,
+        int src,
+        int dest,
+        byte[] srcArr,
+        byte[] destArr)
         throws IOException {
-        // creates two arrays to store the bytes we are swapping
-        byte[] srcArr = new byte[4];
-        byte[] destArr = new byte[4];
-
-        // Fills the arrays with what we want to swap
-        pool.getbytes(srcArr, 4, src * 4);
-        pool.getbytes(destArr, 4, dest * 4);
 
         // wont swap if duplicates
         if (getShort(srcArr) == getShort(destArr)) {
@@ -241,11 +272,6 @@ public class Quicksort {
 
 
     private static short getShort(byte[] bytes) {
-// ByteBuffer bb = ByteBuffer.allocate(2);
-// bb.order(ByteOrder.LITTLE_ENDIAN);
-// bb.put(bytes[0]);
-// bb.put(bytes[1]);
-// return (bb.getShort(0));
 
         return ByteBuffer.wrap(bytes).getShort();
     }
