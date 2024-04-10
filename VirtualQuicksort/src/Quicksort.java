@@ -53,7 +53,7 @@ public class Quicksort {
 
         // This is the main file for the program.
 
-// FileGenerator fg = new FileGenerator(args[0], 1000);
+// FileGenerator fg = new FileGenerator(args[0], 100);
 // fg.generateFile(FileType.ASCII);
 
         RandomAccessFile file = new RandomAccessFile(args[0], "rw");
@@ -105,7 +105,6 @@ public class Quicksort {
      */
     public static void vQuicksort(BufferPool pool, int i, int j)
         throws IOException {
-        System.out.println("left:" + i + " right:" + j);
         // obtains the pivot based on left and right trackers
         int pivotIndex = findpivot(i, j);
 
@@ -131,13 +130,13 @@ public class Quicksort {
         swap(pool, k, j, kArr, jArr);
 
         // recursively calls quicksort
-        if ((k - i) > 9) {
+        if ((k - i) > 13) {
             vQuicksort(pool, i, k - 1);
         }
         else {
             vInsertionsort(pool, i, k - 1);
         }
-        if ((j - k) > 9) {
+        if ((j - k) > 13) {
             vQuicksort(pool, k + 1, j);
         }
         else {
