@@ -53,8 +53,8 @@ public class Quicksort {
 
         // This is the main file for the program.
 
-// FileGenerator fg = new FileGenerator(args[0], 10);
-// fg.generateFile(FileType.ASCII);
+        FileGenerator fg = new FileGenerator(args[0], 10);
+        fg.generateFile(FileType.ASCII);
 
         RandomAccessFile file = new RandomAccessFile(args[0], "rw");
 
@@ -159,7 +159,9 @@ public class Quicksort {
 
             }
             if (right > left) {
-                swap(pool, left, right);
+                if (rightShort != leftShort) {
+                    swap(pool, left, right);
+                }
             } // Swap out-of-place values
         }
         return left;
